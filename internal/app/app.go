@@ -69,6 +69,7 @@ func routes(h *httpapi.Handlers, auth *service.AuthService) http.Handler {
 	mux.Handle("GET /v1/auth/me", protected(http.HandlerFunc(h.Me)))
 	mux.Handle("GET /v1/cart", protected(http.HandlerFunc(h.GetCart)))
 	mux.Handle("PUT /v1/cart/items", protected(http.HandlerFunc(h.UpsertCartItem)))
+	mux.Handle("PUT /v1/cart/coupon", protected(http.HandlerFunc(h.ApplyCartCoupon)))
 	mux.Handle("DELETE /v1/cart", protected(http.HandlerFunc(h.ClearCart)))
 	mux.Handle("POST /v1/checkout", protected(http.HandlerFunc(h.Checkout)))
 	mux.Handle("GET /v1/orders", protected(http.HandlerFunc(h.ListOrders)))
@@ -92,34 +93,73 @@ func chain(mw ...func(http.Handler) http.Handler) func(http.Handler) http.Handle
 func seedProducts(ctx context.Context, products *service.ProductService) error {
 	seeds := []service.ProductInput{
 		{
-			Name:        "AeroFit Pro Runner",
-			Description: "Responsive performance sneakers with breathable knit mesh.",
-			Price:       12999,
-			Currency:    "USD",
-			Stock:       60,
-			Category:    "footwear",
-			Tags:        []string{"sports", "running", "new"},
-			Active:      true,
+			Name:           "AeroFit Pro Runner",
+			Brand:          "AeroFit",
+			Description:    "Responsive performance sneakers with breathable knit mesh.",
+			ShortDesc:      "Performance runners built for everyday speed.",
+			Price:          12999,
+			CompareAtPrice: 15999,
+			Currency:       "USD",
+			Stock:          60,
+			Category:       "footwear",
+			Tags:           []string{"sports", "running", "new"},
+			Images: []domain.ProductImage{
+				{URL: "https://cdn.shop.local/products/aerofit-runner-1.jpg", Alt: "AeroFit Pro Runner side profile", Primary: true, SortOrder: 1},
+			},
+			Attributes: map[string]string{"color": "volt", "material": "knit mesh", "gender": "unisex"},
+			SEO: domain.ProductSEO{
+				Title:       "AeroFit Pro Runner",
+				Description: "Lightweight running sneakers with premium cushioning.",
+				Keywords:    []string{"running shoes", "trainers", "sportswear"},
+			},
+			Featured: true,
+			Active:   true,
 		},
 		{
-			Name:        "Nimbus Smart Watch",
-			Description: "AMOLED smartwatch with health tracking and NFC payments.",
-			Price:       24999,
-			Currency:    "USD",
-			Stock:       35,
-			Category:    "wearables",
-			Tags:        []string{"smart", "fitness"},
-			Active:      true,
+			Name:           "Nimbus Smart Watch",
+			Brand:          "Nimbus",
+			Description:    "AMOLED smartwatch with health tracking and NFC payments.",
+			ShortDesc:      "Smart fitness watch with premium display and wallet support.",
+			Price:          24999,
+			CompareAtPrice: 27999,
+			Currency:       "USD",
+			Stock:          35,
+			Category:       "wearables",
+			Tags:           []string{"smart", "fitness"},
+			Images: []domain.ProductImage{
+				{URL: "https://cdn.shop.local/products/nimbus-watch-1.jpg", Alt: "Nimbus Smart Watch on wrist", Primary: true, SortOrder: 1},
+			},
+			Attributes: map[string]string{"display": "AMOLED", "battery": "7 days", "water_resistant": "5ATM"},
+			SEO: domain.ProductSEO{
+				Title:       "Nimbus Smart Watch",
+				Description: "AMOLED smartwatch with health insights and NFC checkout.",
+				Keywords:    []string{"smartwatch", "wearable", "fitness tracker"},
+			},
+			Featured: true,
+			Active:   true,
 		},
 		{
-			Name:        "Studio Desk Lamp",
-			Description: "Minimal task lamp with wireless charging base.",
-			Price:       8999,
-			Currency:    "USD",
-			Stock:       80,
-			Category:    "home-office",
-			Tags:        []string{"decor", "workspace"},
-			Active:      true,
+			Name:           "Studio Desk Lamp",
+			Brand:          "Halo Home",
+			Description:    "Minimal task lamp with wireless charging base.",
+			ShortDesc:      "Desk lighting with wireless charging and clean industrial lines.",
+			Price:          8999,
+			CompareAtPrice: 10999,
+			Currency:       "USD",
+			Stock:          80,
+			Category:       "home-office",
+			Tags:           []string{"decor", "workspace"},
+			Images: []domain.ProductImage{
+				{URL: "https://cdn.shop.local/products/studio-lamp-1.jpg", Alt: "Studio Desk Lamp on a walnut desk", Primary: true, SortOrder: 1},
+			},
+			Attributes: map[string]string{"finish": "matte black", "power": "USB-C", "feature": "wireless charging"},
+			SEO: domain.ProductSEO{
+				Title:       "Studio Desk Lamp",
+				Description: "A modern desk lamp with charging base for focused workspaces.",
+				Keywords:    []string{"desk lamp", "office decor", "wireless charger"},
+			},
+			Featured: false,
+			Active:   true,
 		},
 	}
 

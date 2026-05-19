@@ -112,6 +112,48 @@ func TestCheckoutRestoresStockOnPaymentFailure(t *testing.T) {
 	}
 }
 
+func TestCartCouponUpdatesTotals(t *testing.T) {
+	store := memory.NewStore()
+	productRepo := testProductRepo{store}
+	cartService := NewCartService(store, productRepo)
+
+	product, err := productRepo.Create(context.Background(), domain.Product{
+		ID:        "prd_coupon",
+		Name:      "Premium Tee",
+		Slug:      "premium-tee",
+		SKU:       "PREMIUM-TEE",
+		Price:     10000,
+		Currency:  "USD",
+		Stock:     10,
+		Category:  "apparel",
+		Active:    true,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+	if err != nil {
+		t.Fatalf("create product returned error: %v", err)
+	}
+
+	if _, err := cartService.UpsertItem(context.Background(), "usr_2", product.ID, 1); err != nil {
+		t.Fatalf("upsert cart item returned error: %v", err)
+	}
+
+	cart, err := cartService.ApplyCoupon(context.Background(), "usr_2", "save10")
+	if err != nil {
+		t.Fatalf("apply coupon returned error: %v", err)
+	}
+
+	if cart.CouponCode != "SAVE10" {
+		t.Fatalf("unexpected raw coupon code: %s", cart.CouponCode)
+	}
+	if cart.Discount != 1000 {
+		t.Fatalf("expected discount 1000, got %d", cart.Discount)
+	}
+	if cart.GrandTotal != 11500 {
+		t.Fatalf("expected grand total 11500, got %d", cart.GrandTotal)
+	}
+}
+
 type testProductRepo struct{ *memory.Store }
 type testOrderRepo struct{ *memory.Store }
 type testPaymentRepo struct{ *memory.Store }

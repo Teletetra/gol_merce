@@ -173,6 +173,24 @@ func (h *Handlers) UpsertCartItem(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, http.StatusOK, cart)
 }
 
+func (h *Handlers) ApplyCartCoupon(w http.ResponseWriter, r *http.Request) {
+	user, _ := UserFromContext(r.Context())
+	var payload struct {
+		CouponCode string `json:"coupon_code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		WriteError(w, http.StatusBadRequest, "invalid json body")
+		return
+	}
+
+	cart, err := h.cart.ApplyCoupon(r.Context(), user.ID, payload.CouponCode)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	WriteJSON(w, http.StatusOK, cart)
+}
+
 func (h *Handlers) ClearCart(w http.ResponseWriter, r *http.Request) {
 	user, _ := UserFromContext(r.Context())
 	if err := h.cart.Clear(r.Context(), user.ID); err != nil {

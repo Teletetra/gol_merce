@@ -28,16 +28,22 @@ type MockGateway struct {
 }
 
 func (g MockGateway) Charge(_ context.Context, input ChargeInput) (domain.Payment, error) {
+	now := time.Now().UTC()
 	payment := domain.Payment{
-		ID:        newID("pay"),
-		OrderID:   input.OrderID,
-		Provider:  g.Provider,
-		Method:    strings.ToLower(strings.TrimSpace(input.Method)),
-		Amount:    input.Amount,
-		Currency:  defaultCurrency(input.Currency),
-		Status:    domain.PaymentStatusCaptured,
-		Reference: fmt.Sprintf("%s-%d", g.Provider, time.Now().UnixNano()),
-		CreatedAt: time.Now().UTC(),
+		ID:            newID("pay"),
+		OrderID:       input.OrderID,
+		Provider:      g.Provider,
+		Method:        strings.ToLower(strings.TrimSpace(input.Method)),
+		Amount:        input.Amount,
+		Currency:      defaultCurrency(input.Currency),
+		Status:        domain.PaymentStatusCaptured,
+		Reference:     fmt.Sprintf("%s-%d", g.Provider, time.Now().UnixNano()),
+		ProviderTxnID: newID("txn"),
+		Metadata: map[string]string{
+			"customer_email": input.CustomerEmail,
+		},
+		CreatedAt:   now,
+		ProcessedAt: &now,
 	}
 
 	if payment.Method == "" {
