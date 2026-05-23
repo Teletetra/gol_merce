@@ -2,7 +2,7 @@
 
 This project provides a production-style e-commerce backend written in Go with:
 
-- JWT-like HMAC token authentication
+- JWT-like HMAC token authentication and more advanced thing
 - Product catalog management with admin-only CRUD
 - Customer cart management
 - Checkout and order creation
